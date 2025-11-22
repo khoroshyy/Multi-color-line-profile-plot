@@ -18,6 +18,70 @@ To run the macro a single time open an image and via Plugins > Macros > Run... s
 
 Download and save the "Line Profile Action Tool" as described above using the name Line Profile Action Tool.txt. When you install this tool via  Plugins > Macros > Install .. an icon will be added to the ImageJ/Fiji tool bar. Clicking this icon will execute the macro code.
 
+## Auto installation of the tool during Fiji startup.
+Clone repository or download code.
+Copy the AutoInstall folder to the Fiji/macro directory.
+Modify the StartupMacros.fiji.ijm script in the macro directory in the following way:
+
+Originally the sctipt contain this autostart past:
+```
+macro "AutoRun" {
+	// run all the .ijm scripts provided in macros/AutoRun/
+	autoRunDirectory = getDirectory("imagej") + "/macros/AutoRun/";
+	if (File.isDirectory(autoRunDirectory)) {
+		list = getFileList(autoRunDirectory);
+		// make sure startup order is consistent
+		Array.sort(list);
+		for (i = 0; i < list.length; i++) {
+			if (endsWith(list[i], ".ijm")) {
+				runMacro(autoRunDirectory + list[i]);
+			}
+		}
+	}
+}
+```
+You can comment or delere it and replace it with this:
+
+```
+macro "AutoRun" {
+    // ----- 1) Run all .ijm scripts from macros/AutoRun/ -----
+    autoRunDirectory = getDirectory("imagej")
+        + "macros" + File.separator
+        + "AutoRun" + File.separator;
+
+    if (File.isDirectory(autoRunDirectory)) {
+        list = getFileList(autoRunDirectory);
+        Array.sort(list); // consistent order
+
+        for (i = 0; i < list.length; i++) {
+            if (endsWith(list[i], ".ijm")) {
+                runMacro(autoRunDirectory + list[i]);
+            }
+        }
+    }
+
+    // ----- 2) Install all .ijm macros from macros/AutoInstall/ -----
+    autoInstallDirectory = getDirectory("imagej")
+        + "macros" + File.separator
+        + "AutoInstall" + File.separator;
+
+    if (File.isDirectory(autoInstallDirectory)) {
+        installList = getFileList(autoInstallDirectory);
+        Array.sort(installList);
+
+        for (i = 0; i < installList.length; i++) {
+            if (endsWith(installList[i], ".ijm")) {
+                // Only install, do NOT run
+                fullPath = autoInstallDirectory + installList[i];
+                run("Install...", "install=[" + fullPath + "]");
+            }
+        }
+    }
+}
+```
+Then the tool shall load on the startup.
+
+
 ## Disclaimer
 
 All the macros published on this repository can be used at your own risk. Although I did my best to ensure that they run as intended, there may be bugs, not expected use or changes to the ImageJ code that results in unexpected behaviour. If you notice a problem with any of the macros please let me know and I can try to solve the problem.
