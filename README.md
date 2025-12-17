@@ -79,7 +79,7 @@ macro "AutoRun" {
     }
 }
 ```
-Then the tool shall load on the startup.
+Then the tool shall load on the startup of Fiji.
 
 
 ## Disclaimer
